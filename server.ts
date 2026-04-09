@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import YTDlpWrapClass from 'yt-dlp-wrap';
 const YTDlpWrap: any = (YTDlpWrapClass as any).default || YTDlpWrapClass;
 import fs from 'fs';
+import { VideoDownloader } from './worker/downloader.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,10 +33,10 @@ async function startServer() {
   // Initialize yt-dlp-wrap
   const ytDlpWrap = new YTDlpWrap();
   
-  if (!fs.existsSync(ytDlpPath)) {
-    console.log('Downloading yt-dlp binary...');
+  if (!fs.existsSync(ytDlpPath) || fs.statSync(ytDlpPath).size === 0) {
+    console.log('Downloading yt-dlp binary (linux standalone)...');
     try {
-      await YTDlpWrap.downloadFromGithub(ytDlpPath);
+      await YTDlpWrap.downloadFromGithub(ytDlpPath, undefined, 'linux');
       console.log('yt-dlp binary downloaded successfully.');
       fs.chmodSync(ytDlpPath, '755');
       ytDlpWrap.setBinaryPath(ytDlpPath);
@@ -54,6 +55,8 @@ async function startServer() {
     }
   }
 
+  const videoDownloader = new VideoDownloader(ytDlpPath);
+
   // API Routes
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' });
@@ -66,16 +69,7 @@ async function startServer() {
     }
 
     try {
-      console.log(`Parsing URL: ${url}`);
-      // Add arguments to help bypass bot detection and 429 errors
-      const metadata = await ytDlpWrap.getVideoInfo([
-        url,
-        '--no-check-certificate',
-        '--extractor-args', 'youtube:player_client=ios,web',
-        '--force-ipv4',
-        '--geo-bypass',
-        '--user-agent', 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1'
-      ]);
+      const metadata = await videoDownloader.getVideoInfo(url);
       res.json(metadata);
     } catch (error: any) {
       console.error('Error parsing URL:', error);
