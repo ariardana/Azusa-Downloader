@@ -1,0 +1,5 @@
+{
+  "name": "StreamSave - Video Downloader",
+  "description": "A powerful video downloader supporting YouTube, TikTok, Instagram, and Facebook using yt-dlp.",
+  "requestFramePermissions": []
+}
