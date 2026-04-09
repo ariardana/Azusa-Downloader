@@ -62,8 +62,8 @@ export default function App() {
       toast.success('Video metadata fetched!');
     } catch (err: any) {
       let msg = err.message;
-      if (msg.includes('Sign in to confirm you’re not a bot')) {
-        msg = "YouTube is temporarily blocking requests from our server. This is a common issue with cloud-based downloaders. Please try a different video or try again later.";
+      if (msg.includes('Sign in to confirm you’re not a bot') || msg.includes('HTTP Error 429')) {
+        msg = "YouTube is currently rate-limiting our server (Error 429). This happens when many users download videos at once. Please try again in a few minutes or try a video from TikTok/Instagram instead.";
       }
       setError(msg);
       toast.error(msg);

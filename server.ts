@@ -67,12 +67,14 @@ async function startServer() {
 
     try {
       console.log(`Parsing URL: ${url}`);
-      // Add arguments to help bypass bot detection
+      // Add arguments to help bypass bot detection and 429 errors
       const metadata = await ytDlpWrap.getVideoInfo([
         url,
         '--no-check-certificate',
-        '--extractor-args', 'youtube:player_client=android,web',
-        '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+        '--extractor-args', 'youtube:player_client=ios,web',
+        '--force-ipv4',
+        '--geo-bypass',
+        '--user-agent', 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1'
       ]);
       res.json(metadata);
     } catch (error: any) {
